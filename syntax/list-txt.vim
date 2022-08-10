@@ -20,7 +20,7 @@ syntax case ignore
 """ Region, match and cluster definitions
 
 " Basic comment line, does not match directives
-syntax match HashCommentLine '^ *#[ #]\+.\+$' contains=@PlainTag,MetaField
+syntax match HashCommentLine '^ *#[ #]\+.\+$' contains=@PlainTag,MetaField,LineContinuation
 
 " Directives always at start of line, and are not comments
 syntax match ListDirective '^#[^ #]\+.*$' contains=@ListDirType,ListDirArgument
