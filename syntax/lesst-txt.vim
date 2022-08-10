@@ -1,8 +1,8 @@
-" File: syntax/list.txt.vim
+" File: syntax/lesst-txt.vim
 " Description: Text list syntax settings
 " Author: B. van Berkum <dev@dotmpe.com>
 " License: Vim license
-" Website: http://github.com/dotmpe/list.txt-vim
+" Website: http://github.com/dotmpe/lesst.txt-vim
 " Version: 0.1-dev
 
 if exists("b:current_syntax")
@@ -133,6 +133,6 @@ highlight default link PlainXXX StatusLineNC
 " XXX: Add our own link groups?
 
 
-let b:current_syntax = "list"
+let b:current_syntax = "lesst-txt"
 
-" Id: list.txt-vim/0.1-dev list.txt.vim
+" Id: lesst.txt-vim/0.1-dev lesst.txt.vim
