@@ -1,16 +1,34 @@
-vim-less.txt
+vim-lest.txt
 =============
-A syntax (color highlighting) script for ``*.list`` files with a generic set
-of tag formats and a particular line structure.
+A syntax (color highlighting) script for a custom, generic text/line-based list
+format inspired by TODO.txt. Highlighted parts include:
 
-Inspired by todo.txt. So highlighted parts include:
+- Different types of line based, \*nix style comments and with contained
+  highlight groups as well.
 
-- (<priority>)
-- @<context>
-- +<context>
-- <key>:<value>
+- Separate number number "spec" column group left and free-form text fields to
+  the right, starting with key: label text fields.
+
+Also tags from TODO.txt:
+
+- (<priority>) to mark numeric or alphabetically ordered classifications or rankings
+- @<context> to 'tag' entry using another, global Id
+- +<context> to tell the entry belongs to a project
+- <key>:<value> to add meta properties
 - #<refid>
+- <<urls>>
 
+- `...`
+- ``...``
+- ```...```
+
+- '...'
+- ''...''
+- '''...'''
+
+- "..."
+- ""...""
+- """..."""
 
 Objectives
 ----------
