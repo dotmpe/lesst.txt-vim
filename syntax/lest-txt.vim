@@ -1,9 +1,10 @@
-" File: syntax/less-txt.vim
+" Id: vim-lest.txt/0.1-dev lest-txt.vim
+" File: syntax/lest-txt.vim
 " Description: Text list syntax settings
 " Author: B. van Berkum <dev@dotmpe.com>
 " License: Vim license
-" Website: http://github.com/dotmpe/lesst.txt-vim
-" Version: 0.1.2-dev
+" Website: http://github.com/dotmpe/vim-lest.txt
+" Version: 0.1.3-dev
 
 if exists("b:current_syntax")
  finish
@@ -21,6 +22,7 @@ syntax case ignore
 
 " Basic comment line, does not match directives
 
+" FIXME: what scope and file should parameters go...
 let allow_empty_comments = 0
 
 syntax match HashCommentLineEmpty '^ *#\+ *$'
@@ -142,6 +144,4 @@ highlight default link PlainXXX StatusLineNC
 " XXX: Add our own link groups?
 
 
-let b:current_syntax = "less-txt"
-
-" Id: lesst.txt-vim/0.1-dev lesst.txt.vim
+let b:current_syntax = "lest-txt"
