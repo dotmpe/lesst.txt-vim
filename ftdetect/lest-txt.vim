@@ -5,4 +5,4 @@
 " Website: http://github.com/dotmpe/vim-lest.txt
 " Version: 0.1.3-dev
 
-autocmd BufNewFile,BufRead *.lst *.list  set filetype=lest-txt
+autocmd BufNewFile,BufRead *.lst *.lest *.lesstxt set filetype=lest-txt

@@ -11,7 +11,7 @@ if exists("b:current_syntax")
 endif
 
 " Lets simplify this a bit
-syntax case ignore
+"syntax case ignore
 
 " Introduce our pre-processor directives as new keywords
 " XXX:
@@ -27,9 +27,9 @@ let allow_empty_comments = 0
 
 syntax match HashCommentLineEmpty '^ *#\+ *$'
 if allow_empty_comments
-  syntax match HashCommentLine '^ *#\+\( .\+\)\?$' contains=@PlainTag,MetaField,LineContinuation
+  syntax match HashCommentLine '^ *#\+\( .\+\)\?$' contains=@PlainTag,MetaField,PathField,VarField,LineContinuation
 else
-  syntax match HashCommentLine '^ *#\+ .\+$' contains=@PlainTag,MetaField,LineContinuation
+  syntax match HashCommentLine '^ *#\+ .\+$' contains=@PlainTag,MetaField,PathField,VarField,LineContinuation
 endif
 
 " Directives always at start of line, and are not comments
@@ -49,6 +49,23 @@ syntax match ListDirValLookupRef '<\zs[^>]\+' contained
 syntax match ListDirValTitleRef '"\zs[^"]\+' contained
 syntax match ListDirValTagRef '[A-Za-z_][A-Za-z0-9_-]\+' contained
 
+"syntax match ListVId '[A-Za-z_][A-Za-z0-9_-]\+\W\+' contained contains=ListNumeric,ListNumerals
+
+"syntax match ListNumeric '\(^\|\W\)[0-9][0-9,\/\.\+-]*\($\|\W\|[A-Za-z0-9\/\^]\{1,9\}\)' contains=ListNumeral
+"syntax match ListNumeric '[0-9][0-9,\/\.\+-]*\($\|\W\|[A-Za-z0-9\/\^]\{1,9\}\)' contains=ListNumeral
+"syntax match ListNumeral '[0-9]\+' contained
+"
+syntax match ListEntry '^[0-9e:,.+ -]\+ .*$' contains=ListStat,ListEntryId,GlobalRef,ClassTag,PlainTag,HashTag,ProjectTag,PathField,MetaField,VarField
+
+syntax match ListEntryId '\([A-Z]\{2,\}:\)\?[^:]\+:\($\| \)' contained contains=IdPrefix
+syntax match IdPrefix '[A-Z]\{2,\}:' contained
+syntax match ListStat '^[0-9e:,.+ -]\+' contained contains=ListStatNA
+syntax match ListStatNA '\(^\|\s\)-' contained
+syntax match ListDate '\(^\|\s\)\d\{8\}\>' contains=ListDate
+
+"syntax cluster ListEntryFields contains=MetaTag,MetaValue,PlainTag
+
+
 syntax cluster PlainTag contains=PlainTODO,PlainFIXME,PlainXXX,PlainBUG,PlainNOTE
 syntax match PlainBUG '\<BUG\>' contained
 syntax match PlainFIXME '\<FIXME\>' contained
@@ -56,20 +73,22 @@ syntax match PlainNOTE '\<NOTE\>' contained
 syntax match PlainTODO '\<TODO\>' contained
 syntax match PlainXXX '\<XXX\>' contained
 
-syntax match MetaField '@[^:]\+: .*$' contained contains=MetaTag,MetaValue
-syntax match MetaTag '@[A-Za-z_][A-Za-z0-9_-]\+' contained
-syntax match MetaValue ': .*$' contained contains=@QuotedValue
+syntax match ClassTag '@[A-Za-z_][A-Za-z0-9+:\./_-]\+' contained contains=PathField,MetaField,VarField
+syntax match ProjectTag '+[A-Za-z_][A-Za-z0-9_-]\+' contained
+syntax match HashTag '#[A-Za-z_][A-Za-z0-9_-]\+' contained
+syntax match GlobalRef '<[^>]\+>' contained
 
-"syntax match ListVId '[A-Za-z_][A-Za-z0-9_-]\+\W\+' contained contains=ListNumeric,ListNumerals
+syntax match MetaField '[^ ]\+:[^: ]\+:\?\($\|\s\)' contained contains=MetaTag,MetaValue,PathField,VarField
+syntax match MetaTag '[A-Za-z0-9_-]\+:' contained
+syntax match MetaValue '[^: ]\+\($\|\s\)' contained contains=@QuotedValue
 
-"syntax match ListNumeric '\(^\|\W\)[0-9][0-9,\/\.\+-]*\($\|\W\|[A-Za-z0-9\/\^]\{1,9\}\)' contains=ListNumeral
-"syntax match ListNumeric '[0-9][0-9,\/\.\+-]*\($\|\W\|[A-Za-z0-9\/\^]\{1,9\}\)' contains=ListNumeral
-"syntax match ListNumeral '[0-9]\+' contained
-"
-syntax match ListStat '^[0-9e:,.+ -]\+' contains=ListStatNA
-syntax match ListStatNA '\(^\|\s\)-' contained
+syntax match PathField '[A-Za-z0-9\./_-]\+/[A-Za-z0-9_-]\+/\?' contained contains=PathName
+syntax match PathName '[A-Za-z0-9_-]\+\($\|\s\)' contained
 
-syntax match ListDate '\(^\|\s\)\d\{2,8\}\>' contains=ListDate
+syntax match VarField '[A-Za-z0-9\./_-]\+=[^/: ]*' contained contains=VarTag,VarValue
+syntax match VarTag '[A-Za-z0-9_-]\+=' contained
+syntax match VarValue '[A-Za-z0-9_-]\+\($\|\s\)' contained
+
 
 syntax cluster QuotedValue contains=@SingleQuoted,@AngleQuoted,@DoubleQuoted
 syntax cluster SingleQuoted contains=Quoted,Quoted3
@@ -119,6 +138,9 @@ highlight default link ListDate PreProc
 highlight default link ListNumeric Number
 highlight default link ListNumeral Type
 
+highlight default link ListEntryId Directory
+highlight default link IdPrefix Type
+
 highlight default link Quoted String
 highlight default link Quoted3 String
 highlight default link QuotedAngle String
@@ -130,7 +152,21 @@ highlight default link ListStat SpecialKey
 highlight default link ListStatNA PreProc
 highlight default link ListVId Type
 
-highlight default link MetaTag SpecialKey
+highlight default link HashTag Character
+highlight default link ProjectTag SpecialKey
+highlight default link GlobalRef SpecialComment
+highlight default link ClassTag Identifier
+
+highlight default link VarField SpecialComment
+highlight default link VarTag Label
+highlight default link VarValue Tag
+
+highlight default link PathField Warning
+highlight default link PathName SpecialComment
+
+highlight default link MetaField Character
+highlight default link MetaTag Directory
+highlight default link MetaValue String
 highlight default link MetaTagComment SpecialComment
 
 highlight default link PlainBUG CursorLineNr
