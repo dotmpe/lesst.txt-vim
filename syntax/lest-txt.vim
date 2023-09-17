@@ -27,10 +27,29 @@ let allow_empty_comments = 0
 
 syntax match HashCommentLineEmpty '^ *#\+ *$'
 if allow_empty_comments
-  syntax match HashCommentLine '^ *#\+\( .\+\)\?$' contains=@PlainTag,MetaField,PathField,VarField,LineContinuation
+  syntax match HashCommentLine '^ *#\+\( .\+\)\?$' contains=@PlainTag,@Entry
+  " ClassTag,PathField,MetaField,VarField,LineContinuation
 else
-  syntax match HashCommentLine '^ *#\+ .\+$' contains=@PlainTag,MetaField,PathField,VarField,LineContinuation
+  syntax match HashCommentLine '^ *#\+ .\+$' contains=@PlainTag,@Entry
+  "ClassTag,PathField,MetaField,VarField,LineContinuation
 endif
+ 
+syntax match ClosedEntry '^ *x .*$' contains=@ClosedEntry
+syntax match CommentEntry '^ *#- .*$' contains=@Entry
+syntax match CommentEntry '^ *# [A-Za-z0-9 \.-]\+: .*$' contains=@PlainTag,FieldId,@Entry
+
+syntax match HighPriorityId '([1-2a-h][0-9 \.-]\+)' contained contains=NumeralId
+syntax match MedPriorityId '([3-5i-p][0-9 \.-]\+)' contained contains=NumeralId
+syntax match LowPriorityId '([6-9q-z][0-9 \.-]\+)' contained contains=NumeralId
+syntax match UnPriorityId '(0[0-9 \.-]\+)' contained contains=NumeralId
+syntax cluster PriorityId contains=HighPriorityId,MedPriorityId,LowPriorityId,UnPriorityId
+
+syntax match HexNumeralId '[ :=]\zs[0-9bx\.\+-][0-9a-fei,/^\.\+-]\+' contained
+syntax match NumeralId '[ :=(]\zs[0-9b\.\+-][0-9ei,/^\.\+-]\+' contained
+syntax match FieldId '[A-Za-z0-9 \.-]\+' contained
+
+syntax cluster Entry contains=@PriorityId,ClassTag,PathField,MetaField,VarField,NumeralId,LineContinuation
+syntax cluster ClosedEntry contains=ClassTag,PathField,NumeralId,LineContinuation
 
 " Directives always at start of line, and are not comments
 syntax match ListDirective '^#[^ #]\+.*$' contains=@ListDirType,ListDirArgument
@@ -73,7 +92,7 @@ syntax match PlainNOTE '\<NOTE\>' contained
 syntax match PlainTODO '\<TODO\>' contained
 syntax match PlainXXX '\<XXX\>' contained
 
-syntax match ClassTag '@[A-Za-z_][A-Za-z0-9+:\./_-]\+' contained contains=PathField,MetaField,VarField
+syntax match ClassTag '@[A-Za-z_][A-Za-z0-9+:\./_-]\+' contained contains=MetaField
 syntax match ProjectTag '+[A-Za-z_][A-Za-z0-9_-]\+' contained
 syntax match HashTag '#[A-Za-z_][A-Za-z0-9_-]\+' contained
 syntax match GlobalRef '<[^>]\+>' contained
@@ -119,6 +138,8 @@ syntax match LineContinuation '\\$'
 
 " Assign our matches and regions to syntax highlight groups
 
+highlight default link CommentEntry Comment
+highlight default link ClosedEntry Comment
 highlight default link HashCommentLine Comment
 highlight default link HashCommentLineEmpty Warning
 
@@ -137,6 +158,13 @@ highlight default link ListDirValTagRef Identifier
 highlight default link ListDate PreProc
 highlight default link ListNumeric Number
 highlight default link ListNumeral Type
+
+highlight default link UnPriorityId Warning
+highlight default link MedPriorityId IncSearch
+highlight default link HighPriorityId Search
+highlight default link LowPriorityId Special
+highlight default link NumeralId Number
+highlight default link HexNumeralId Number
 
 highlight default link ListEntryId Directory
 highlight default link IdPrefix Type
