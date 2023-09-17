@@ -27,16 +27,10 @@ let allow_empty_comments = 0
 
 syntax match HashCommentLineEmpty '^ *#\+ *$'
 if allow_empty_comments
-  syntax match HashCommentLine '^ *#\+\( .\+\)\?$' contains=@PlainTag,@Entry
-  " ClassTag,PathField,MetaField,VarField,LineContinuation
+  syntax match HashCommentLine '^ *#\+\( .\+\)\?$' contains=@PlainTag,@EntryFields
 else
-  syntax match HashCommentLine '^ *#\+ .\+$' contains=@PlainTag,@Entry
-  "ClassTag,PathField,MetaField,VarField,LineContinuation
+  syntax match HashCommentLine '^ *#\+ .\+$' contains=@PlainTag,@EntryFields
 endif
- 
-syntax match ClosedEntry '^ *x .*$' contains=@ClosedEntry
-syntax match CommentEntry '^ *#- .*$' contains=@Entry
-syntax match CommentEntry '^ *# [A-Za-z0-9 \.-]\+: .*$' contains=@PlainTag,FieldId,@Entry
 
 syntax match HighPriorityId '([1-2a-h][0-9 \.-]\+)' contained contains=NumeralId
 syntax match MedPriorityId '([3-5i-p][0-9 \.-]\+)' contained contains=NumeralId
@@ -48,35 +42,14 @@ syntax match HexNumeralId '[ :=]\zs[0-9bx\.\+-][0-9a-fei,/^\.\+-]\+' contained
 syntax match NumeralId '[ :=(]\zs[0-9b\.\+-][0-9ei,/^\.\+-]\+' contained
 syntax match FieldId '[A-Za-z0-9 \.-]\+' contained
 
-syntax cluster Entry contains=@PriorityId,ClassTag,PathField,MetaField,VarField,NumeralId,LineContinuation
+syntax cluster EntryFields contains=@PriorityId,GlobalRef,ClassTag,PlainTag,HashTag,ProjectTag,PathField,MetaField,VarField,NumeralId,LineContinuation
 syntax cluster ClosedEntry contains=ClassTag,PathField,NumeralId,LineContinuation
+ 
+syntax match ClosedEntry '^ *x .*$' contains=@ClosedEntry
+"syntax match CommentEntry '^ *#- .*$' contains=@EntryFields
+syntax match CommentEntry '^ *# [A-Za-z0-9 \.-]\+: .*$' contains=@PlainTag,FieldId,@EntryFields
+syntax match IndentedEntry '^ \+.*$' contains=@PlainTag,ListStat,@EntryFields
 
-" Directives always at start of line, and are not comments
-syntax match ListDirective '^#[^ #]\+.*$' contains=@ListDirType,ListDirArgument
-
-syntax cluster ListDirType contains=ListDirTypeIncl,ListDirTypeCols,ListDirTypeSch
-
-syntax match ListDirTypeIncl '\<incl\(ude\)\?\>' contained
-syntax match ListDirTypeCols '\<col\(umn\)\?s\>' contained
-syntax match ListDirTypeSch '\<sch\(eme\)\?\>' contained
-
-syntax match ListDirArgument ' [^ ]\+$' contained contains=@ListDirRefTypes
-
-syntax cluster ListDirRefTypes contains=ListDirValLookupRef,ListDirValTitleRef,ListDirValTagRef
-
-syntax match ListDirValLookupRef '<\zs[^>]\+' contained
-syntax match ListDirValTitleRef '"\zs[^"]\+' contained
-syntax match ListDirValTagRef '[A-Za-z_][A-Za-z0-9_-]\+' contained
-
-"syntax match ListVId '[A-Za-z_][A-Za-z0-9_-]\+\W\+' contained contains=ListNumeric,ListNumerals
-
-"syntax match ListNumeric '\(^\|\W\)[0-9][0-9,\/\.\+-]*\($\|\W\|[A-Za-z0-9\/\^]\{1,9\}\)' contains=ListNumeral
-"syntax match ListNumeric '[0-9][0-9,\/\.\+-]*\($\|\W\|[A-Za-z0-9\/\^]\{1,9\}\)' contains=ListNumeral
-"syntax match ListNumeral '[0-9]\+' contained
-"
-syntax match ListEntry '^[0-9e:,.+ -]\+ .*$' contains=ListStat,ListEntryId,GlobalRef,ClassTag,PlainTag,HashTag,ProjectTag,PathField,MetaField,VarField
-
-syntax match ListEntryId '\([A-Z]\{2,\}:\)\?[^:]\+:\($\| \)' contained contains=IdPrefix
 syntax match IdPrefix '[A-Z]\{2,\}:' contained
 syntax match ListStat '^[0-9e:,.+ -]\+' contained contains=ListStatNA
 syntax match ListStatNA '\(^\|\s\)-' contained
@@ -125,6 +98,31 @@ syntax match QuotedDouble3 '\s*"""[^"]*"""' contained
 
 syntax match LineContinuation '\\$'
 
+" Directives always at start of line, and are not comments
+syntax match ListDirective '^#[^ #]\+.*$' contains=@ListDirType,ListDirArgument
+
+syntax cluster ListDirType contains=ListDirTypeIncl,ListDirTypeCols,ListDirTypeSch
+
+syntax match ListDirTypeIncl '\<incl\(ude\)\?\>' contained
+syntax match ListDirTypeCols '\<col\(umn\)\?s\>' contained
+syntax match ListDirTypeSch '\<sch\(eme\)\?\>' contained
+
+syntax match ListDirArgument ' [^ ]\+$' contained contains=@ListDirRefTypes
+
+syntax cluster ListDirRefTypes contains=ListDirValLookupRef,ListDirValTitleRef,ListDirValTagRef
+
+syntax match ListDirValLookupRef '<\zs[^>]\+' contained
+syntax match ListDirValTitleRef '"\zs[^"]\+' contained
+syntax match ListDirValTagRef '[A-Za-z_][A-Za-z0-9_-]\+' contained
+
+"syntax match ListVId '[A-Za-z_][A-Za-z0-9_-]\+\W\+' contained contains=ListNumeric,ListNumerals
+
+"syntax match ListNumeric '\(^\|\W\)[0-9][0-9,\/\.\+-]*\($\|\W\|[A-Za-z0-9\/\^]\{1,9\}\)' contains=ListNumeral
+"syntax match ListNumeric '[0-9][0-9,\/\.\+-]*\($\|\W\|[A-Za-z0-9\/\^]\{1,9\}\)' contains=ListNumeral
+"syntax match ListNumeral '[0-9]\+' contained
+"
+syntax match ListEntry '^[0-9e:,.+-][0-9e:,.+ -]\+ .*$' contains=ListStat,ListEntryId,@EntryFields
+syntax match ListEntryId '\([A-Z]\{2,\}:\)\?[^:]\+:\($\| \)' contained contains=IdPrefix
 
 
 """ Highight links
