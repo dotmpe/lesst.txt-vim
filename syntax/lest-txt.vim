@@ -70,9 +70,33 @@ syntax match ProjectTag '+[A-Za-z_][A-Za-z0-9_-]\+' contained
 syntax match HashTag '#[A-Za-z_][A-Za-z0-9_-]\+' contained
 syntax match GlobalRef '<[^>]\+>' contained
 
-syntax match MetaField '[^ ]\+:[^: ]\+:\?\($\|\s\)' contained contains=MetaTag,MetaValue,PathField,VarField
+" Intended text/data blocks
+syntax match BlockData '^  *.*$' contains=BlockText,BlockPunct
+syntax match BlockText '[A-Za-z0-9_]\+' contained
+syntax match BlockPunct '[^A-Za-z0-9_]\+' contained
+"syntax cluster BlockElements contains=Bq,CmdLine
+
+" ArgVar is same as GlobalRef
+syntax match ArgWord '[^ ]\+' contained
+syntax match ArgVar '<[^>]\+>' contained
+syntax match ArgOptional '\[[^\]]\+\]' contained 
+syntax match CmdLine '^ *% .*' contains=CmdLinePrefix,ArgWord,ArgVar,ArgOptional
+syntax match CmdLinePrefix ' % [^ ]\+' contains=CmdLineSym,CmdName
+syntax match CmdName ' [^ ]\+'
+syntax match CmdLineSym ' % '
+
+syntax match Bq '^ *> .*$' contains=BqPrefix
+syntax match BqPrefix ' > '
+
+" Headers in (indented) blocks
+syntax match HeaderLine '^  *\#\+ [^ ]\+.*$' contains=Header
+syntax match Header '[^#]\+' contained
+" Lists
+syntax match ListLine '^  *[\*-] '
+
+syntax match MetaField '[^ ]\+:[^: ]\+:\?\($\|\s\)' contained contains=MetaTag,MetaValue,VarField
 syntax match MetaTag '[A-Za-z0-9_-]\+:' contained
-syntax match MetaValue '[^: ]\+\($\|\s\)' contained contains=@QuotedValue
+syntax match MetaValue '[^: ]\+\($\|\s\)' contained contains=@QuotedValue,PathField
 
 syntax match PathField '[A-Za-z0-9\./_-]\+/[A-Za-z0-9_-]\+/\?' contained contains=PathName
 syntax match PathName '[A-Za-z0-9_-]\+\($\|\s\)' contained
@@ -177,6 +201,10 @@ highlight default link QuotedDouble3 String
 highlight default link ListStat SpecialKey
 highlight default link ListStatNA PreProc
 highlight default link ListVId Type
+highlight default link ListLine Comment
+
+highlight default link HeaderLine Special
+highlight default link Header Label
 
 highlight default link HashTag Character
 highlight default link ProjectTag SpecialKey
@@ -189,6 +217,16 @@ highlight default link VarValue Tag
 
 highlight default link PathField Warning
 highlight default link PathName SpecialComment
+
+highlight default link BlockText Normal
+highlight default link BlockPunct Pmenu
+
+highlight default link Bq Comment
+highlight default link BqPrefix Ignore
+
+highlight default link ArgVar SpecialComment
+highlight default link ArgOptional SpecialComment
+highlight default link CmdLineSym Character
 
 highlight default link MetaField Character
 highlight default link MetaTag Directory
