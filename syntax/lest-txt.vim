@@ -42,7 +42,7 @@ syntax match HexNumeralId '[ :=]\zs[0-9bx\.\+-][0-9a-fei,/^\.\+-]\+' contained
 syntax match NumeralId '[ :=(]\zs[0-9b\.\+-][0-9ei,/^\.\+-]\+' contained
 syntax match FieldId '[A-Za-z0-9 \.-]\+' contained
 
-syntax cluster EntryFields contains=@PriorityId,GlobalRef,ClassTag,PlainTag,HashTag,ProjectTag,PathField,MetaField,VarField,NumeralId,LineContinuation
+syntax cluster EntryFields contains=@PriorityId,GlobalRef,GlobalCite,ClassTag,PlainTag,HashTag,ProjectTag,PathField,MetaField,VarField,NumeralId,LineContinuation
 syntax cluster ClosedEntry contains=ClassTag,PathField,NumeralId,LineContinuation
  
 syntax match ClosedEntry '^ *x .*$' contains=@ClosedEntry
@@ -69,11 +69,21 @@ syntax match ClassTag '@[A-Za-z_][A-Za-z0-9+:\./_-]\+' contained contains=MetaFi
 syntax match ProjectTag '+[A-Za-z_][A-Za-z0-9_-]\+' contained
 syntax match HashTag '#[A-Za-z_][A-Za-z0-9_-]\+' contained
 syntax match GlobalRef '<[^>]\+>' contained
+syntax match GlobalCite '\[[^\]]\+\]' contained
+
+" XXX: this should work (does with search)
+"syntax match EntityPathName '\s\@1<=[a-z0-9\.-]\+' contains=DotPath
+syntax match EntityPathName '[a-z0-9\.-]\+' contains=DotPath
+",DotName,EntityName
+syntax match Dot '\.' contained
+syntax match DotPath '\([a-z0-9][a-z0-9-]\{0,30\}[a-z0-9]\.[a-z0-9][a-z0-9-]\{0,30\}[a-z0-9]\)\+' contained contains=DotName,EntityName,Dot
+syntax match DotName '\([a-z0-9][a-z0-9-]\{0,30\}[a-z0-9]\)\zs\.' contained contains=Dot,EntityName
+syntax match EntityName '[a-z0-9][a-z0-9-]\{0,30\}[a-z0-9]' contained
 
 " Intended text/data blocks
-syntax match BlockData '^  *.*$' contains=BlockText,BlockPunct
+syntax match BlockData '^  *.*$' contains=ClassTag,ProjectTag,GlobalRef,GlobalCite,EntityPathName,BlockText,BlockPunct
 syntax match BlockText '[A-Za-z0-9_]\+' contained
-syntax match BlockPunct '[^A-Za-z0-9_]\+' contained
+syntax match BlockPunct '\(\.\(\ \|$\)\)\|[^\.@\+\[<A-Za-z0-9_]\+' contained
 "syntax cluster BlockElements contains=Bq,CmdLine
 
 " ArgVar is same as GlobalRef
@@ -113,12 +123,12 @@ syntax cluster DoubleQuoted contains=QuotedDouble,QuotedDouble3
 
 " FIXME: should be using regions here
 " Colour quoted values serpatedly at various levels
-syntax match Quoted '\s*\'[^\']*\'' contained
-syntax match Quoted3 '\s*\'\'\'[^\']*\'\'\'' contained
-syntax match QuotedAngle '\s*`[^`]*`' contained
-syntax match QuotedAngle3 '\s*```[^`]*```' contained
-syntax match QuotedDouble '\s*"[^"]*"' contained
-syntax match QuotedDouble3 '\s*"""[^"]*"""' contained
+syntax match Quoted '\s*\zs\'[^\']*\'' contained
+syntax match Quoted3 '\s*\zs\'\'\'[^\']*\'\'\'' contained
+syntax match QuotedAngle '\s*\zs`[^`]*`' contained
+syntax match QuotedAngle3 '\s*\zs```[^`]*```' contained
+syntax match QuotedDouble '\s*\zs"[^"]*"' contained
+syntax match QuotedDouble3 '\s*\zs"""[^"]*"""' contained
 
 syntax match LineContinuation '\\$'
 
@@ -209,6 +219,7 @@ highlight default link Header Label
 highlight default link HashTag Character
 highlight default link ProjectTag SpecialKey
 highlight default link GlobalRef SpecialComment
+highlight default link GlobalCite SpecialComment
 highlight default link ClassTag Identifier
 
 highlight default link VarField SpecialComment
@@ -223,6 +234,9 @@ highlight default link BlockPunct Pmenu
 
 highlight default link Bq Comment
 highlight default link BqPrefix Ignore
+
+highlight default link EntityName SpecialKey
+highlight default link Dot Pmenu
 
 highlight default link ArgVar SpecialComment
 highlight default link ArgOptional SpecialComment
