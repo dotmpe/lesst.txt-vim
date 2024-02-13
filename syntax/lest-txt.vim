@@ -69,7 +69,7 @@ syntax match GlobalRef '<[^>]\+>' contained
 syntax match GlobalCite '\[[^\]]\+\]' contained
 
 " Intended text/data blocks
-syntax match BlockData '^  *.*$' contains=ClassTag,ProjectTag,GlobalRef,GlobalCite,DotPathF,DotNameF,BlockText,BlockPunct
+syntax match BlockData '^  *.*$' contained contains=HeaderLine,FieldLine,Bq,CmdLine,DotpathF,ClassTag,ProjectTag,GlobalRef,GlobalCite,DotPathF,DotNameF,BlockText,BlockPunct
 "syntax match BlockText '[A-Za-z0-9_]\+' contained
 syntax match BlockPunct '\(\.\_s\)\|[^\ \.@\+\[<A-Za-z0-9_]' contained
 "syntax cluster BlockElements contains=Bq,CmdLine
@@ -87,12 +87,16 @@ syntax match ArgWord '[^ ]\+' contained
 syntax match ArgVar '<[^>]\+>' contained
 syntax match ArgOptional '\[[^\]]\+\]' contained 
 syntax match CmdLine '^ *% .*' contains=CmdLinePrefix,ArgWord,ArgVar,ArgOptional
-syntax match CmdLinePrefix ' % [^ ]\+' contains=CmdLineSym,CmdName
-syntax match CmdName ' [^ ]\+'
-syntax match CmdLineSym ' % '
+syntax match CmdLinePrefix '^ * % [^ ]\+' contains=CmdLineSym,CmdName
+syntax match CmdName ' \ze[^ ]\+'
+syntax match CmdLineSym '^ * % ' contains=BlockLinePunct
 
 syntax match Bq '^ *> .*$' contains=BqPrefix
-syntax match BqPrefix ' > '
+syntax match BqPrefix '^ * > ' contains=BlockLinePunct
+
+syntax match FieldLine '^  *[^ ]\+:$' contains=BlockLinePunct
+
+syntax match BlockLinePunct '[:\$%&>\|-]'
 
 " Headers in (indented) blocks
 syntax match HeaderLine '^  *\#\+ [^ ]\+.*$' contains=Header
@@ -107,7 +111,7 @@ syntax match MetaValue '[^: ]\+\_s' contained contains=@QuotedValue,PathField
 syntax match PathField '[A-Za-z0-9\./_-]\+/[A-Za-z0-9_-]\+/\?' contained contains=PathName
 syntax match PathName '[A-Za-z0-9_-]\+\_s' contained
 
-syntax match VarField ' \zs[A-Za-z0-9_\./-]\+=[^ ]*\ze\_s' contained contains=VarValue,VarTag,VarPath
+syntax match VarField ' \zs[A-Za-z0-9_\./\$\&-]\+=[^ ]*\ze\_s' contained contains=VarValue,VarTag,VarPath
 syntax match VarPath  '[A-Za-z0-9_\.-]\+\ze=' contained contains=VarTag,DotPath
 syntax match VarTag   '[A-Za-z0-9_-]\+=\@=' contained
 syntax match VarValue '=\@=[^ ]*' contained contains=DotName,DotPath
@@ -152,7 +156,7 @@ syntax match ListDirValTagRef '[A-Za-z_][A-Za-z0-9_-]\+' contained
 "syntax match ListNumeric '[0-9][0-9,\/\.\+-]*\($\|\W\|[A-Za-z0-9\/\^]\{1,9\}\)' contains=ListNumeral
 syntax match ListNumeral '[0-9]\+' contained
 
-sy region ListEntryBlock start='^[0-9:,\.+-]' end='\n\ze\([^ ]\|$\)' contains=ListRecord,ListStatEntryId,BlockData
+sy region ListEntryBlock start='^[0-9:,\.+-]' end='\n\+\ze[^ ]' contains=ListRecord,ListStatEntryId,BlockData
 
 sy match ListStatEntryId  '^[0-9e:,\.+-][0-9e:,\.+ -]*\(\([^:]\+:\)\|[A-Za-z0-9_/\.-]\+\)\ze\_s' contained contains=ListStat,ListEntryId nextgroup=ListRecord
 sy match ListStat         '^[0-9e:,\.+-][0-9e:,\.+ -]*\ze ' contained contains=ListRelTimeSpec,ListDate,ListStatNA nextgroup=ListEntryId
@@ -242,9 +246,11 @@ highlight default link PathName SpecialComment
 
 highlight default link BlockText Normal
 highlight default link BlockPunct Pmenu
+highlight default link BlockLinePunct Ignore
+
+highlight default link FieldLine Comment
 
 highlight default link Bq Comment
-highlight default link BqPrefix Ignore
 
 highlight default link EntityName FoldColumn
 highlight default link Dot SpecialComment
