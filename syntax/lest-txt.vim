@@ -39,21 +39,18 @@ syntax match UnPriorityId '(0[0-9 \.-]\+)' contained contains=NumeralId
 syntax cluster PriorityId contains=HighPriorityId,MedPriorityId,LowPriorityId,UnPriorityId
 
 syntax match HexNumeralId '[ :=]\zs[0-9bx\.\+-][0-9a-fei,/^\.\+-]\+' contained
-syntax match NumeralId '[ :=(]\zs[0-9b\.\+-][0-9ei,/^\.\+-]\+' contained
+syntax match NumeralId '[ :=(]\zs[0-9b\.\+-]*[0-9][0-9ei,/^\.\+-]*\>' contained
 syntax match FieldId '[A-Za-z0-9 \.-]\+' contained
 
-syntax cluster EntryFields contains=@PriorityId,GlobalRef,GlobalCite,ClassTag,PlainTag,HashTag,ProjectTag,PathField,MetaField,VarField,NumeralId,LineContinuation
+"syntax cluster StatFields contains=@PriorityId
+" XXX: deprecate?
+syntax cluster EntryFields contains=@PriorityId,@QuotedValue,GlobalRef,GlobalCite,ClassTag,PlainTag,HashTag,ProjectTag,PathField,MetaField,VarField,NumeralId
 syntax cluster ClosedEntry contains=ClassTag,PathField,NumeralId,LineContinuation
  
 syntax match ClosedEntry '^ *x .*$' contains=@ClosedEntry
 "syntax match CommentEntry '^ *#- .*$' contains=@EntryFields
 syntax match CommentEntry '^ *# [A-Za-z0-9 \.-]\+: .*$' contains=@PlainTag,FieldId,@EntryFields
 syntax match IndentedEntry '^ \+.*$' contains=@PlainTag,ListStat,@EntryFields
-
-syntax match IdPrefix '[A-Z]\{2,\}:' contained
-syntax match ListStat '^[0-9e:,.+ -]\+' contained contains=ListStatNA
-syntax match ListStatNA '\(^\|\s\)-' contained
-syntax match ListDate '\(^\|\s\)\d\{8\}\>' contains=ListDate
 
 "syntax cluster ListEntryFields contains=MetaTag,MetaValue,PlainTag
 
@@ -71,20 +68,19 @@ syntax match HashTag '#[A-Za-z_][A-Za-z0-9_-]\+' contained
 syntax match GlobalRef '<[^>]\+>' contained
 syntax match GlobalCite '\[[^\]]\+\]' contained
 
-" XXX: this should work (does with search)
-"syntax match EntityPathName '\s\@1<=[a-z0-9\.-]\+' contains=DotPath
-syntax match EntityPathName '[a-z0-9\.-]\+' contains=DotPath
-",DotName,EntityName
-syntax match Dot '\.' contained
-syntax match DotPath '\([a-z0-9][a-z0-9-]\{0,30\}[a-z0-9]\.[a-z0-9][a-z0-9-]\{0,30\}[a-z0-9]\)\+' contained contains=DotName,EntityName,Dot
-syntax match DotName '\([a-z0-9][a-z0-9-]\{0,30\}[a-z0-9]\)\zs\.' contained contains=Dot,EntityName
-syntax match EntityName '[a-z0-9][a-z0-9-]\{0,30\}[a-z0-9]' contained
-
 " Intended text/data blocks
-syntax match BlockData '^  *.*$' contains=ClassTag,ProjectTag,GlobalRef,GlobalCite,EntityPathName,BlockText,BlockPunct
-syntax match BlockText '[A-Za-z0-9_]\+' contained
-syntax match BlockPunct '\(\.\(\ \|$\)\)\|[^\.@\+\[<A-Za-z0-9_]\+' contained
+syntax match BlockData '^  *.*$' contains=ClassTag,ProjectTag,GlobalRef,GlobalCite,DotPathF,DotNameF,BlockText,BlockPunct
+"syntax match BlockText '[A-Za-z0-9_]\+' contained
+syntax match BlockPunct '\(\.\_s\)\|[^\ \.@\+\[<A-Za-z0-9_]' contained
 "syntax cluster BlockElements contains=Bq,CmdLine
+
+sy match DotPathRel '\.\+[a-z0-9][a-z0-9-]\{0,30\}[a-z0-9]\(\.[a-z0-9][a-z0-9-]\{0,30\}[a-z0-9]\)\+\ze\_s\?' contains=DotPath,DotNameF
+sy match DotPath '[a-z0-9][a-z0-9-]\{0,30\}[a-z0-9]\(\.[a-z0-9][a-z0-9-]\{0,30\}[a-z0-9]\)\+\ze\_s\?' contains=EntityName,Dot
+sy match DotPathF '\(^\|\s\)\zs[a-z0-9][a-z0-9-]\{0,30\}[a-z0-9]\(\.[a-z0-9][a-z0-9-]\{0,30\}[a-z0-9]\)\+\ze\_s' contains=EntityName,Dot
+sy match DotName '\.[a-z0-9][a-z0-9-]\{0,30\}[a-z0-9]' contains=EntityName,Dot
+sy match DotNameF '\(^\|\s\)\zs\.[a-z0-9][a-z0-9-]\{0,30\}[a-z0-9]\ze\_s' contains=EntityName,Dot
+sy match Dot '\.' contained
+sy match EntityName '[a-z0-9][a-z0-9-]\{0,30\}[a-z0-9]' contained
 
 " ArgVar is same as GlobalRef
 syntax match ArgWord '[^ ]\+' contained
@@ -100,20 +96,21 @@ syntax match BqPrefix ' > '
 
 " Headers in (indented) blocks
 syntax match HeaderLine '^  *\#\+ [^ ]\+.*$' contains=Header
-syntax match Header '[^#]\+' contained
+syntax match Header '\#\+\zs[^\n]\+' contained
 " Lists
 syntax match ListLine '^  *[\*-] '
 
-syntax match MetaField '[^ ]\+:[^: ]\+:\?\($\|\s\)' contained contains=MetaTag,MetaValue,VarField
+syntax match MetaField '[^ ]\+:[^: ]\+:\?\_s' contained contains=MetaTag,MetaValue,VarField
 syntax match MetaTag '[A-Za-z0-9_-]\+:' contained
-syntax match MetaValue '[^: ]\+\($\|\s\)' contained contains=@QuotedValue,PathField
+syntax match MetaValue '[^: ]\+\_s' contained contains=@QuotedValue,PathField
 
 syntax match PathField '[A-Za-z0-9\./_-]\+/[A-Za-z0-9_-]\+/\?' contained contains=PathName
-syntax match PathName '[A-Za-z0-9_-]\+\($\|\s\)' contained
+syntax match PathName '[A-Za-z0-9_-]\+\_s' contained
 
-syntax match VarField '[A-Za-z0-9\./_-]\+=[^/: ]*' contained contains=VarTag,VarValue
-syntax match VarTag '[A-Za-z0-9_-]\+=' contained
-syntax match VarValue '[A-Za-z0-9_-]\+\($\|\s\)' contained
+syntax match VarField ' \zs[A-Za-z0-9_\./-]\+=[^ ]*\ze\_s' contained contains=VarValue,VarTag,VarPath
+syntax match VarPath  '[A-Za-z0-9_\.-]\+\ze=' contained contains=VarTag,DotPath
+syntax match VarTag   '[A-Za-z0-9_-]\+=\@=' contained
+syntax match VarValue '=\@=[^ ]*' contained contains=DotName,DotPath
 
 
 syntax cluster QuotedValue contains=@SingleQuoted,@AngleQuoted,@DoubleQuoted
@@ -153,10 +150,21 @@ syntax match ListDirValTagRef '[A-Za-z_][A-Za-z0-9_-]\+' contained
 
 "syntax match ListNumeric '\(^\|\W\)[0-9][0-9,\/\.\+-]*\($\|\W\|[A-Za-z0-9\/\^]\{1,9\}\)' contains=ListNumeral
 "syntax match ListNumeric '[0-9][0-9,\/\.\+-]*\($\|\W\|[A-Za-z0-9\/\^]\{1,9\}\)' contains=ListNumeral
-"syntax match ListNumeral '[0-9]\+' contained
-"
-syntax match ListEntry '^[0-9e:,.+-][0-9e:,.+ -]\+ .*$' contains=ListStat,ListEntryId,@EntryFields
-syntax match ListEntryId '\([A-Z]\{2,\}:\)\?[^:]\+:\($\| \)' contained contains=IdPrefix
+syntax match ListNumeral '[0-9]\+' contained
+
+sy region ListEntryBlock start='^[0-9:,\.+-]' end='\n\ze\([^ ]\|$\)' contains=ListRecord,ListStatEntryId,BlockData
+
+sy match ListStatEntryId  '^[0-9e:,\.+-][0-9e:,\.+ -]*\(\([^:]\+:\)\|[A-Za-z0-9_/\.-]\+\)\ze\_s' contained contains=ListStat,ListEntryId nextgroup=ListRecord
+sy match ListStat         '^[0-9e:,\.+-][0-9e:,\.+ -]*\ze ' contained contains=ListRelTimeSpec,ListDate,ListStatNA nextgroup=ListEntryId
+sy match ListEntryId      ' \zs\(\([^:]\+\ze:\)\|[A-Za-z0-9_/\.-]\+\ze\)\_s' contained contains=IdPrefix,LineContinuation nextgroup=ListRecord
+"syntax match IdPrefix    '[^ ]\{2,\}\ze:\?\s_' contained
+sy match ListRecord       ' \zs.*$' contained contains=@EntryFields,LineContinuation
+
+sy match ListStatNA       '\(^\| \)\zs-' contained
+sy match ListRelTimeSpec  '\(^\| \)\zs-\d\{4\}\(+\d\d\)\?\ze ' contained transparent contains=ListStatPunct
+sy match ListDate         '\(^\| \)\zs\d\{4\}-\d\d-\d\d\|[0-9]\{8\}\ze ' contained transparent contains=ListStatPunct
+sy match ListStatPunct    '[:,\.+-]' contained
+"sy match ListDateTime    '\(^\| \)\zs\d\{8\}\ze ' contained
 
 
 """ Highight links
@@ -187,7 +195,8 @@ highlight default link ListDirValLookupRef Identifier
 highlight default link ListDirValTitleRef String
 highlight default link ListDirValTagRef Identifier
 
-highlight default link ListDate PreProc
+highlight default link ListDate SpecialKey
+highlight default link ListStatPunct Type
 highlight default link ListNumeric Number
 highlight default link ListNumeral Type
 
@@ -198,6 +207,7 @@ highlight default link LowPriorityId Special
 highlight default link NumeralId Number
 highlight default link HexNumeralId Number
 
+highlight default link ListStatEntryId FoldColumn
 highlight default link ListEntryId Directory
 highlight default link IdPrefix Type
 
@@ -214,7 +224,7 @@ highlight default link ListVId Type
 highlight default link ListLine Comment
 
 highlight default link HeaderLine Special
-highlight default link Header Label
+highlight default link Header CursorLineNr
 
 highlight default link HashTag Character
 highlight default link ProjectTag SpecialKey
@@ -223,6 +233,7 @@ highlight default link GlobalCite SpecialComment
 highlight default link ClassTag Identifier
 
 highlight default link VarField SpecialComment
+highlight default link VarPath SpecialComment
 highlight default link VarTag Label
 highlight default link VarValue Tag
 
@@ -235,8 +246,8 @@ highlight default link BlockPunct Pmenu
 highlight default link Bq Comment
 highlight default link BqPrefix Ignore
 
-highlight default link EntityName SpecialKey
-highlight default link Dot Pmenu
+highlight default link EntityName FoldColumn
+highlight default link Dot SpecialComment
 
 highlight default link ArgVar SpecialComment
 highlight default link ArgOptional SpecialComment
