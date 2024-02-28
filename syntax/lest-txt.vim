@@ -62,6 +62,7 @@ syntax match PlainNOTE '\<NOTE\>' contained
 syntax match PlainTODO '\<TODO\>' contained
 syntax match PlainXXX '\<XXX\>' contained
 
+syntax cluster SymRef contains=GLobalRef,GlobalCite,HashTag,ProjectTag,ClassTag
 syntax match ClassTag '@[A-Za-z_][A-Za-z0-9+:\./_-]\+' contained contains=MetaField
 syntax match ProjectTag '+[A-Za-z_][A-Za-z0-9_-]\+' contained
 syntax match HashTag '#[A-Za-z_][A-Za-z0-9_-]\+' contained
@@ -74,10 +75,10 @@ syntax match BlockData '^  *.*$' contained contains=HeaderLine,FieldLine,Bq,CmdL
 syntax match BlockPunct '\(\.\_s\)\|[^\ \.@\+\[<A-Za-z0-9_]' contained
 "syntax cluster BlockElements contains=Bq,CmdLine
 
-sy match DotPathRel '\.\+[a-z0-9][a-z0-9-]\{0,30\}[a-z0-9]\(\.[a-z0-9][a-z0-9-]\{0,30\}[a-z0-9]\)\+\ze\_s\?' contains=DotPath,DotNameF
-sy match DotPath '[a-z0-9][a-z0-9-]\{0,30\}[a-z0-9]\(\.[a-z0-9][a-z0-9-]\{0,30\}[a-z0-9]\)\+\ze\_s\?' contains=EntityName,Dot
+sy match DotPathRel '\.\+[a-z0-9][a-z0-9-]\{0,30\}[a-z0-9]\(\.[a-z0-9][a-z0-9-]\{0,30\}[a-z0-9]\)\+\ze\_s\?' contained contains=DotPath,DotNameF
+sy match DotPath '[a-z0-9][a-z0-9-]\{0,30\}[a-z0-9]\(\.[a-z0-9][a-z0-9-]\{0,30\}[a-z0-9]\)\+\ze\_s\?' contained contains=EntityName,Dot
 sy match DotPathF '\(^\|\s\)\zs[a-z0-9][a-z0-9-]\{0,30\}[a-z0-9]\(\.[a-z0-9][a-z0-9-]\{0,30\}[a-z0-9]\)\+\ze\_s' contains=EntityName,Dot
-sy match DotName '\.[a-z0-9][a-z0-9-]\{0,30\}[a-z0-9]' contains=EntityName,Dot
+sy match DotName '\.[a-z0-9][a-z0-9-]\{0,30\}[a-z0-9]' contained contains=EntityName,Dot
 sy match DotNameF '\(^\|\s\)\zs\.[a-z0-9][a-z0-9-]\{0,30\}[a-z0-9]\ze\_s' contains=EntityName,Dot
 sy match Dot '\.' contained
 sy match EntityName '[a-z0-9][a-z0-9-]\{0,30\}[a-z0-9]' contained
@@ -91,10 +92,11 @@ syntax match CmdLinePrefix '^ * % [^ ]\+' contains=CmdLineSym,CmdName
 syntax match CmdName ' \ze[^ ]\+'
 syntax match CmdLineSym '^ * % ' contains=BlockLinePunct
 
-syntax match Bq '^ *> .*$' contains=BqPrefix
+" Blockquote as in old MIME email text formatting
+syntax match Bq '^ *> .*$' contains=BqPrefix,@SymRef,@PlainTag
 syntax match BqPrefix '^ * > ' contains=BlockLinePunct
 
-syntax match FieldLine '^  *[^ ]\+:$' contains=BlockLinePunct
+syntax match FieldLine '^  *[^ ]\+:\ze\_s' contains=BlockLinePunct
 
 syntax match BlockLinePunct '[:\$%&>\|-]'
 
@@ -159,17 +161,19 @@ syntax match ListNumeral '[0-9]\+' contained
 sy region ListEntryBlock start='^[0-9:,\.+-]' end='\n\+\ze[^ ]' contains=ListRecord,ListStatEntryId,BlockData
 
 sy match ListStatEntryId  '^[0-9e:,\.+-][0-9e:,\.+ -]*\(\([^:]\+:\)\|[A-Za-z0-9_/\.-]\+\)\ze\_s' contained contains=ListStat,ListEntryId nextgroup=ListRecord
-sy match ListStat         '^[0-9e:,\.+-][0-9e:,\.+ -]*\ze ' contained contains=ListRelTimeSpec,ListDate,ListStatNA nextgroup=ListEntryId
+sy match ListStat         '^[0-9e:,\.+-][0-9e:,\.+ -]*\ze ' contained contains=ListRelTimeSpec,ListDateTime,ListDate,ListStatNA nextgroup=ListEntryId
 sy match ListEntryId      ' \zs\(\([^:]\+\ze:\)\|[A-Za-z0-9_/\.-]\+\ze\)\_s' contained contains=IdPrefix,LineContinuation nextgroup=ListRecord
 "syntax match IdPrefix    '[^ ]\{2,\}\ze:\?\s_' contained
 sy match ListRecord       ' \zs.*$' contained contains=@EntryFields,LineContinuation
 
 sy match ListStatNA       '\(^\| \)\zs-' contained
 sy match ListRelTimeSpec  '\(^\| \)\zs-\d\{4\}\(+\d\d\)\?\ze ' contained transparent contains=ListStatPunct
-sy match ListDate         '\(^\| \)\zs\d\{4\}-\d\d-\d\d\|[0-9]\{8\}\ze ' contained transparent contains=ListStatPunct
-sy match ListStatPunct    '[:,\.+-]' contained
+sy match ListDateTime     '\(^\| \)\zs\d\{4\}-\d\d-\d\d\|\d\{8\}-\d\{4\}\([+-]\d\d\)\?\ze ' contained transparent contains=ListStatPunct
+sy match ListDate         '\(^\| \)\zs\d\{4\}-\d\d-\d\d\|\d\{8\}\ze ' contained transparent contains=ListStatPunct
+
 "sy match ListDateTime    '\(^\| \)\zs\d\{8\}\ze ' contained
 
+sy match ListStatPunct    '[:,\.+-]' contained
 
 """ Highight links
 
